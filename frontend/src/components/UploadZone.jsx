@@ -26,6 +26,10 @@ export default function UploadZone() {
         setUploading(true);
         try {
             const result = await createBatch(files, formType);
+            if (!result || !result.id) {
+                throw new Error('Upload succeeded but no batch id returned');
+            }
+
             navigate(`/results/${result.id}`);
         } catch (error) {
             console.error("Upload failed:", error);
