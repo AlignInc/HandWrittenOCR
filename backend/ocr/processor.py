@@ -21,9 +21,10 @@ class OCRProcessor:
         # Initialize PP-StructureV2 for Layout Analysis and Table Recognition
         # table=True enables table recognition
         # ocr=True enables text recognition within blocks
+        # Disable image_orientation to avoid requiring extra PULC model download
         self.pp_structure = PPStructure(
             show_log=True,
-            image_orientation=True,
+            image_orientation=False,
             table=True,
             ocr=True,
             layout=True,
