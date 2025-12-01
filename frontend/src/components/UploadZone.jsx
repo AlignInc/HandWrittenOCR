@@ -1,11 +1,12 @@
 import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useNavigate } from 'react-router-dom';
-import { createBatch } from '../api';
+import { createBatch, getBatch } from '../api';
 
 export default function UploadZone() {
     const [files, setFiles] = useState([]);
     const [uploading, setUploading] = useState(false);
+    const [uploadStatus, setUploadStatus] = useState('');
     const [formType, setFormType] = useState('GCCF_10K');
     const navigate = useNavigate();
 
@@ -30,12 +31,28 @@ export default function UploadZone() {
                 throw new Error('Upload succeeded but no batch id returned');
             }
 
-            navigate(`/results/${result.id}`);
+            setUploadStatus('已上傳，正在識別...');
+
+            // 等待處理完成再跳轉，避免 undefined/空白頁
+            const batchId = result.id;
+            const deadline = Date.now() + 120000; // 最長等 120s
+            let latest = result;
+
+            while (Date.now() < deadline) {
+                latest = await getBatch(batchId);
+                if (latest.status && !['pending', 'processing'].includes(latest.status)) {
+                    break;
+                }
+                await new Promise(r => setTimeout(r, 1500));
+            }
+
+            navigate(`/results/${batchId}`);
         } catch (error) {
             console.error("Upload failed:", error);
             alert("上傳失敗，請重試");
         } finally {
             setUploading(false);
+            setUploadStatus('');
         }
     };
 
@@ -160,12 +177,15 @@ export default function UploadZone() {
                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                                     </svg>
-                                    Processing...
+                                    {uploadStatus || 'Processing...'}
                                 </span>
                             ) : (
                                 'Start Processing'
                             )}
                         </button>
+                        {uploadStatus && (
+                            <p className="mt-3 text-sm text-cyber-muted">{uploadStatus}</p>
+                        )}
                     </div>
                 </div>
             </div>
