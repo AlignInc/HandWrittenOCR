@@ -56,7 +56,7 @@ export default function MarkdownPreview({ data = {}, confidence = {} }) {
     };
 
     return (
-        <div className="prose dark:prose-invert max-w-none">
+        <div className="prose prose-sm sm:prose max-w-none">
             <ReactMarkdown>{generateMarkdown()}</ReactMarkdown>
         </div>
     );

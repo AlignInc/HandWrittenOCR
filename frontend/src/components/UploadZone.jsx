@@ -7,7 +7,7 @@ export default function UploadZone() {
     const [files, setFiles] = useState([]);
     const [uploading, setUploading] = useState(false);
     const [uploadStatus, setUploadStatus] = useState('');
-    const [formType, setFormType] = useState('GCCF_10K');
+    const [formType, setFormType] = useState('AUTO');
     const navigate = useNavigate();
 
     const onDrop = useCallback(acceptedFiles => {
@@ -82,7 +82,7 @@ export default function UploadZone() {
                     {/* Form Type Selector */}
                     <div className="flex justify-center mb-8">
                         <div className="inline-flex bg-white p-1 rounded-xl border border-cyber-border/70 shadow-sm backdrop-blur-sm">
-                            {['GCCF_10K', 'MGT_BOOK'].map((type) => (
+                            {['AUTO', 'GCCF_10K_P1', 'GCCF_10K_P2', 'MGT_BOOK', 'HOUSE_ROSTER'].map((type) => (
                                 <button
                                     key={type}
                                     onClick={() => setFormType(type)}

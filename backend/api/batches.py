@@ -28,7 +28,7 @@ task_queue = Queue(connection=redis_conn)
 @router.post("", response_model=BatchResponse, status_code=201)
 async def create_batch(
     images: List[UploadFile] = File(...),
-    form_type: str = Query("GCCF_10K"),
+    form_type: str = Query("AUTO"),
     db: Session = Depends(get_db)
 ):
     """

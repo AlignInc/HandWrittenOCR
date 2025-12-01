@@ -45,29 +45,29 @@ export default function FieldEditor({ data = {}, confidence = {}, onChange }) {
     return (
         <div className="space-y-6">
             {Object.keys(groupedFields).map(section => (
-                <div key={section} className="border-b border-gray-200 dark:border-gray-700 pb-6 last:border-0">
-                    <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">
+                <div key={section} className="border-b border-gray-200 pb-6 last:border-0">
+                    <h3 className="text-lg font-semibold mb-4 text-gray-800">
                         {section}
                     </h3>
                     <div className="space-y-4">
                         {groupedFields[section].map(key => (
-                            <div key={key} className="grid grid-cols-12 gap-4 items-start">
-                                <div className="col-span-4 pt-2">
-                                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 break-words">
+                            <div key={key} className="grid grid-cols-1 sm:grid-cols-12 gap-3 sm:gap-4 items-start">
+                                <div className="sm:col-span-4 pt-1 sm:pt-2">
+                                    <label className="text-sm font-medium text-gray-700 break-words">
                                         {key}
                                     </label>
                                 </div>
-                                <div className="col-span-6">
+                                <div className="sm:col-span-6">
                                     <input
                                         type="text"
                                         value={data[key] || ''}
                                         onChange={(e) => handleChange(key, e.target.value)}
-                                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm sm:text-base"
                                         placeholder="未識別"
                                     />
                                 </div>
-                                <div className="col-span-2 pt-2 text-right">
-                                    {getConfidenceBadge(confidence[key])}
+                                <div className="sm:col-span-2 pt-1 sm:pt-2 flex sm:justify-end">
+                                    <div className="min-w-[72px]">{getConfidenceBadge(confidence[key])}</div>
                                 </div>
                             </div>
                         ))}
@@ -76,7 +76,7 @@ export default function FieldEditor({ data = {}, confidence = {}, onChange }) {
             ))}
 
             {Object.keys(data).length === 0 && (
-                <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                <div className="text-center py-12 text-gray-500">
                     <p className="text-lg">暫無識別結果</p>
                     <p className="text-sm mt-2">請等待 OCR 處理完成</p>
                 </div>

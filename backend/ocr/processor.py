@@ -157,11 +157,11 @@ class OCRProcessor:
             # Bubble up so caller can mark the batch as failed
             raise
 
-    def extract_structured_data(self, raw_text: str, form_type="GCCF_10K", ocr_results=None):
+    def extract_structured_data(self, raw_text: str, form_type="GCCF_10K_P1", ocr_results=None):
         """
         Extract structured fields based on form template
         """
-        template = FORM_TEMPLATES.get(form_type, FORM_TEMPLATES["GCCF_10K"])
+        template = FORM_TEMPLATES.get(form_type, FORM_TEMPLATES["GCCF_10K_P1"])
         extracted_data = {}
         field_confidences = {}
         
@@ -198,7 +198,32 @@ class OCRProcessor:
 
         return extracted_data, field_confidences
 
-    def extract_with_gpt_vision(self, image_path, form_type="GCCF_10K"):
+    def detect_form_type(self, raw_text: str, image_path: str = "") -> str:
+        """
+        Heuristic form-type detection based on text cues and filename.
+        """
+        text_lower = (raw_text or "").lower()
+        fname = Path(image_path).name.lower() if image_path else ""
+
+        # Filename hints
+        if "a01" in fname or "roster" in fname or "owner" in fname or "mgt" in fname:
+            return "HOUSE_ROSTER"
+        if "p2" in fname:
+            return "GCCF_10K_P2"
+        if "p1" in fname:
+            return "GCCF_10K_P1"
+
+        # Content hints
+        if "調查人員" in raw_text or "聲明及承諾" in raw_text or "undertaking" in text_lower:
+            return "GCCF_10K_P2"
+        if "申請人家屬" in raw_text or "現職" in raw_text or "華人慈善基金" in raw_text:
+            return "GCCF_10K_P1"
+        if ("單位" in raw_text and "業主姓名" in raw_text) or "owner name" in text_lower:
+            return "HOUSE_ROSTER"
+
+        return "GCCF_10K_P1"
+
+    def extract_with_gpt_vision(self, image_path, form_type="GCCF_10K_P1"):
         """
         Use GPT-4 Vision for intelligent extraction
         """
@@ -212,7 +237,7 @@ class OCRProcessor:
                 return base64.b64encode(image_file.read()).decode('utf-8')
 
         base64_image = encode_image(image_path)
-        template = FORM_TEMPLATES.get(form_type, FORM_TEMPLATES["GCCF_10K"])
+        template = FORM_TEMPLATES.get(form_type, FORM_TEMPLATES["GCCF_10K_P1"])
         
         prompt = template.get("gpt_prompt", "Extract all fields from this form.")
 
@@ -262,7 +287,7 @@ class OCRProcessor:
 
     # Assuming there's a process_document method that uses the above
     # Adding a placeholder for context based on the user's edit
-    def process_document(self, image_path, form_type="GCCF_10K"):
+    def process_document(self, image_path, form_type="AUTO"):
         """
         End-to-end document processing that returns a unified result dict
         expected by downstream callers:
@@ -270,11 +295,12 @@ class OCRProcessor:
           "data": {...},
           "confidence": {...},
           "raw_text": "...",
-          "method": "paddle_ocr" | "gpt-4-vision"
+          "method": "paddle_ocr" | "gpt-4-vision",
+          "form_type": "detected template name"
         }
         """
 
-        result = {"data": {}, "confidence": {}, "raw_text": "", "method": "paddle_ocr"}
+        result = {"data": {}, "confidence": {}, "raw_text": "", "method": "paddle_ocr", "form_type": form_type}
         
         # Preprocess image (optional, depending on PaddleOCR's internal preprocessing)
         # img, gray_img = self.preprocess_image(image_path)
@@ -282,11 +308,19 @@ class OCRProcessor:
         # Extract text and structure using PaddleOCR
         raw_text, avg_confidence, paddle_results = self.extract_text_paddle(image_path)
         result["raw_text"] = raw_text
+
+        # Auto-detect form if required
+        detected_type = form_type
+        if form_type in (None, "", "AUTO"):
+            detected_type = self.detect_form_type(raw_text, image_path)
+            result["form_type"] = detected_type
+        else:
+            result["form_type"] = form_type
         
         # Try GPT-4 Vision if enabled
         if self.use_gpt_vision and self.client:
             try:
-                gpt_data, gpt_confidence = self.extract_with_gpt_vision(image_path, form_type)
+                gpt_data, gpt_confidence = self.extract_with_gpt_vision(image_path, detected_type)
                 if gpt_data:
                     result["data"] = gpt_data
                     result["confidence"] = gpt_confidence
@@ -294,17 +328,17 @@ class OCRProcessor:
                     return result
             except Exception as e:
                 logger.error(f"GPT-4 Vision failed, falling back to template matching: {e}")
-        
+
         # Fallback: Use template-based extraction from PaddleOCR results
         layout_data, layout_conf = self._template_based_extraction(
-            raw_text, paddle_results, form_type
+            raw_text, paddle_results, detected_type
         )
-        rule_data, rule_conf = self.extract_structured_data(raw_text, form_type, paddle_results)
+        rule_data, rule_conf = self.extract_structured_data(raw_text, detected_type, paddle_results)
 
         # Merge heuristic extraction so we return whatever signal we have
         merged_data = {}
         merged_conf = {}
-        template = get_template(form_type)
+        template = get_template(detected_type)
         for field in template["fields"]:
             key = field["key"]
             layout_val = layout_data.get(key)

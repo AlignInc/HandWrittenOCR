@@ -121,30 +121,30 @@ const ResultsView = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 text-cyber-text p-6">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 text-cyber-text p-4 md:p-6">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
-                <div className="flex justify-between items-center mb-8">
-                    <Link to="/" className="text-cyber-muted hover:text-cyber-primary transition-colors flex items-center gap-2">
+                <div className="flex flex-wrap gap-4 justify-between items-start md:items-center mb-8">
+                    <Link to="/" className="text-cyber-muted hover:text-cyber-primary transition-colors flex items-center gap-2 text-sm md:text-base">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
                         Back to Upload
                     </Link>
-                    <div className="flex items-center gap-4">
-                        <span className={`px-3 py-1 rounded-full text-sm font-mono ${getStatusBadge(batch.status)}`}>
+                    <div className="flex flex-wrap gap-3 md:gap-4 items-center w-full md:w-auto">
+                        <span className={`px-3 py-1 rounded-full text-xs md:text-sm font-mono ${getStatusBadge(batch.status)}`}>
                             {batch.status?.toUpperCase?.() || 'UNKNOWN'}
                         </span>
                         <button
                             onClick={() => handleExport('csv')}
-                            className="px-4 py-2 bg-cyber-card border border-cyber-border rounded-lg hover:border-cyber-primary/50 transition-all"
+                            className="px-4 py-2 bg-cyber-card border border-cyber-border rounded-lg hover:border-cyber-primary/50 transition-all w-full sm:w-auto text-sm md:text-base"
                         >
                             Export CSV
                         </button>
                         <button
                             onClick={handleUpdate}
                             disabled={saving}
-                            className="px-4 py-2 bg-cyber-primary text-white rounded-lg font-bold hover:shadow-[0_10px_30px_rgba(37,99,235,0.35)] transition-all"
+                            className="px-4 py-2 bg-cyber-primary text-white rounded-lg font-bold hover:shadow-[0_10px_30px_rgba(37,99,235,0.35)] transition-all w-full sm:w-auto text-sm md:text-base"
                         >
                             {saving ? 'Saving...' : 'Save Changes'}
                         </button>
@@ -154,11 +154,11 @@ const ResultsView = () => {
                 {/* Processing Steps Visualization */}
                 <ProcessingSteps status={batch.status} />
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 mt-8">
                     {/* Left Panel: Image Viewer */}
                     <div className="lg:col-span-1 space-y-6">
-                        <div className="glass-panel rounded-xl p-4 sticky top-6">
-                            <h2 className="text-xl font-bold mb-4 text-cyber-primary flex items-center gap-2">
+                        <div className="glass-panel rounded-xl p-4 lg:sticky lg:top-6">
+                            <h2 className="text-lg md:text-xl font-bold mb-4 text-cyber-primary flex items-center gap-2">
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
@@ -182,23 +182,25 @@ const ResultsView = () => {
 
                             {/* Thumbnails */}
                             {batch.images.length > 1 && (
-                                <div className="grid grid-cols-4 gap-2 mt-4">
-                                    {batch.images.map((img, idx) => (
-                                        <button
-                                            key={idx}
-                                            onClick={() => setSelectedImageIndex(idx)}
-                                            className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${selectedImageIndex === idx
-                                                    ? 'border-cyber-primary shadow-[0_0_10px_rgba(0,240,255,0.3)]'
-                                                    : 'border-cyber-border hover:border-cyber-muted'
-                                                }`}
-                                        >
-                                            <img
-                                                src={getImageUrl(img.file_path)}
-                                                alt={`Page ${idx + 1}`}
-                                                className="w-full h-full object-cover"
-                                            />
-                                        </button>
-                                    ))}
+                                <div className="mt-4 -mx-2 px-2">
+                                    <div className="flex gap-3 overflow-x-auto pb-1">
+                                        {batch.images.map((img, idx) => (
+                                            <button
+                                                key={idx}
+                                                onClick={() => setSelectedImageIndex(idx)}
+                                                className={`relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all ${selectedImageIndex === idx
+                                                        ? 'border-cyber-primary shadow-[0_0_10px_rgba(37,99,235,0.25)]'
+                                                        : 'border-cyber-border hover:border-cyber-muted'
+                                                    }`}
+                                            >
+                                                <img
+                                                    src={getImageUrl(img.file_path)}
+                                                    alt={`Page ${idx + 1}`}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -208,7 +210,7 @@ const ResultsView = () => {
                     <div className="lg:col-span-2">
                         <div className="glass-panel rounded-xl overflow-hidden min-h-[600px] flex flex-col">
                             {/* Tabs */}
-                            <div className="flex border-b border-cyber-border bg-white">
+                            <div className="flex border-b border-cyber-border bg-white flex-wrap">
                                 {[
                                     { id: 'fields', label: 'Structured Data', icon: '📝' },
                                     { id: 'markdown', label: 'Markdown', icon: '📄' },
@@ -218,8 +220,8 @@ const ResultsView = () => {
                                         key={tab.id}
                                         onClick={() => setActiveTab(tab.id)}
                                         className={`
-                      flex-1 py-4 text-sm font-bold tracking-wider uppercase transition-all
-                      flex items-center justify-center gap-2
+                      flex-1 py-3 md:py-4 text-xs md:text-sm font-bold tracking-wider uppercase transition-all
+                      flex items-center justify-center gap-2 min-w-[110px]
                       ${activeTab === tab.id
                                                 ? 'bg-cyber-primary/10 text-cyber-primary border-b-2 border-cyber-primary'
                                                 : 'text-cyber-muted hover:text-cyber-text hover:bg-white/5'}
@@ -232,7 +234,7 @@ const ResultsView = () => {
                             </div>
 
                             {/* Content */}
-                            <div className="p-6 flex-1 bg-white/70">
+                            <div className="p-4 md:p-6 flex-1 bg-white/70">
                                 {activeTab === 'fields' && currentImage && (
                                     <FieldEditor
                                         data={currentImage.ocr_data || {}}
