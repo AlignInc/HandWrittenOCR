@@ -10,7 +10,7 @@ from redis import Redis
 from redis.exceptions import RedisError
 from rq import Queue
 
-from database import get_db
+from database import get_db, SessionLocal
 from models import Batch, Image, OcrResult, BatchStatus
 from schemas import BatchResponse, BatchUpdate, ImageResponse
 from config import UPLOAD_DIR, EXPORT_DIR, REDIS_URL
@@ -71,18 +71,30 @@ async def create_batch(
     use_sync = os.getenv("SYNC_PROCESSING", "false").lower() == "true"
     single_image = len(images) == 1
 
+    processed_sync = False
+
     try:
         if use_sync or single_image:
             # Immediate processing in the API process for single uploads or when forced sync
             process_batch(batch.id)
+            processed_sync = True
         else:
             task_queue.enqueue(process_batch, batch.id, job_timeout='10m')
     except RedisError:
         # Redis unavailable – fall back to synchronous processing to avoid hanging spinner
         process_batch(batch.id)
+        processed_sync = True
     
-    # Return batch info
-    return _build_batch_response(batch, db)
+    # Return batch info (refresh from DB if processed synchronously)
+    if processed_sync:
+        resp_db = SessionLocal()
+        try:
+            fresh_batch = resp_db.query(Batch).filter(Batch.id == batch.id).first()
+            return _build_batch_response(fresh_batch, resp_db)
+        finally:
+            resp_db.close()
+    else:
+        return _build_batch_response(batch, db)
 
 @router.get("/{batch_id}", response_model=BatchResponse)
 def get_batch(batch_id: str, db: Session = Depends(get_db)):
