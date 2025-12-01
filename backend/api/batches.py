@@ -7,12 +7,14 @@ import shutil
 from pathlib import Path
 from datetime import datetime
 from redis import Redis
+from redis.exceptions import RedisError
 from rq import Queue
 
 from database import get_db
 from models import Batch, Image, OcrResult, BatchStatus
 from schemas import BatchResponse, BatchUpdate, ImageResponse
 from config import UPLOAD_DIR, EXPORT_DIR, REDIS_URL
+import os
 from workers.batch_processor import process_batch
 from exporters.csv_exporter import export_single_to_csv
 from exporters.markdown_exporter import export_to_markdown
@@ -65,8 +67,17 @@ async def create_batch(
     
     db.commit()
     
-    # Queue batch for processing
-    task_queue.enqueue(process_batch, batch.id, job_timeout='10m')
+    # Queue batch for processing (or sync fallback)
+    use_sync = os.getenv("SYNC_PROCESSING", "false").lower() == "true"
+    try:
+        if use_sync:
+            # Immediate processing in the API process
+            process_batch(batch.id)
+        else:
+            task_queue.enqueue(process_batch, batch.id, job_timeout='10m')
+    except RedisError:
+        # Redis unavailable – fall back to synchronous processing to avoid hanging spinner
+        process_batch(batch.id)
     
     # Return batch info
     return _build_batch_response(batch, db)
