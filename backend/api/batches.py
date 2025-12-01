@@ -67,11 +67,13 @@ async def create_batch(
     
     db.commit()
     
-    # Queue batch for processing (or sync fallback)
+    # Decide processing mode
     use_sync = os.getenv("SYNC_PROCESSING", "false").lower() == "true"
+    single_image = len(images) == 1
+
     try:
-        if use_sync:
-            # Immediate processing in the API process
+        if use_sync or single_image:
+            # Immediate processing in the API process for single uploads or when forced sync
             process_batch(batch.id)
         else:
             task_queue.enqueue(process_batch, batch.id, job_timeout='10m')
