@@ -1,0 +1,108 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-success: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  --gradient-accent: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  @apply bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100;
+}
+
+/* Glassmorphism effect */
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  @apply bg-cyber-black text-cyber-text font-sans antialiased overflow-x-hidden;
+  background-image:
+    radial-gradient(circle at 50% 0%, #1a1f35 0%, transparent 70%),
+    radial-gradient(circle at 100% 0%, #121624 0%, transparent 50%);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-cyber-dark;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-cyber-border rounded-full hover:bg-cyber-primary/50 transition-colors;
+}
+
+/* Glassmorphism */
+.glass-panel {
+  @apply bg-cyber-card/60 backdrop-blur-xl border border-cyber-border/50 shadow-2xl;
+}
+
+.glass-card {
+  @apply bg-cyber-card/40 backdrop-blur-md border border-cyber-border/30 hover:border-cyber-primary/50 transition-all duration-300;
+}
+
+/* Neon Glow Effects */
+.neon-text {
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+}
+
+.neon-border {
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+}
+
+/* Scanning Effect */
+.scan-line {
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  background: var(--cyber-primary);
+  box-shadow: 0 0 10px var(--cyber-primary);
+  animation: scan 2s linear infinite;
+  opacity: 0.7;
+}
+
+@keyframes scan {
+  0% {
+    top: 0%;
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  90% {
+    opacity: 1;
+  }
+
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+/* Grid Background */
+.cyber-grid-bg {
+  background-size: 40px 40px;
+  background-image: linear-gradient(to right, rgba(30, 36, 56, 0.3) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(30, 36, 56, 0.3) 1px, transparent 1px);
+  mask-image: radial-gradient(circle at center, black 40%, transparent 80%);
+}
+
+.confidence-medium {
+  @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200;
+}
+
+.confidence-low {
+  @apply bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200;
+}

@@ -1,0 +1,27 @@
+# Node
+frontend/node_modules
+frontend/dist
+
+# Python
+backend/venv
+__pycache__
+*.pyc
+
+# Data & uploads
+backend/uploads
+backend/data
+*.db
+*.sqlite
+
+# Environment/config
+.env
+*/.env
+*.log
+
+# IDE & OS
+.vscode
+.DS_Store
+
+# Coverage / reports
+coverage
+.coverage
