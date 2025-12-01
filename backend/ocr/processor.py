@@ -83,10 +83,24 @@ class OCRProcessor:
                 
                 # Handle Table regions
                 if region_type == 'table':
-                    # Table html is in res['html']
-                    # We can also extract text from cells
-                    if 'html' in res:
-                        full_text.append(f"[TABLE DATA]")
+                    # Table html is in res['html'] – extract plain text as fallback
+                    if isinstance(res, dict):
+                        html = res.get('html') or ''
+                        if html:
+                            import re
+                            plain = re.sub('<[^<]+?>', ' ', html)
+                            plain = ' '.join(plain.split())
+                            if plain:
+                                full_text.append(plain)
+                        # some versions store cell texts under 'cell'
+                        cells = res.get('cell') or res.get('cells') or []
+                        if isinstance(cells, list):
+                            for c in cells:
+                                txt = c.get('text') if isinstance(c, dict) else None
+                                if txt:
+                                    full_text.append(txt)
+                    # keep placeholder to signal table presence
+                    full_text.append("[TABLE DATA]")
                 
                 # Handle Text/Title/Header regions
                 elif region_type in ['text', 'title', 'header', 'footer']:
@@ -261,6 +275,17 @@ class OCRProcessor:
         result["data"], result["confidence"] = self._template_based_extraction(
             raw_text, paddle_results, form_type
         )
+
+        # If nothing meaningful extracted, at least return full raw text
+        if not any(v for v in result["data"].values() if v not in (None, "")):
+            result["data"] = {"full_text": raw_text}
+            # use average confidence if available, else 0
+            try:
+                confidences = [c for c in result["confidence"].values() if isinstance(c, (int, float))]
+                avg = sum(confidences) / len(confidences) if confidences else 0.0
+            except Exception:
+                avg = 0.0
+            result["confidence"] = {"full_text": avg}
         
         return result
     
