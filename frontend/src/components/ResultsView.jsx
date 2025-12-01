@@ -6,7 +6,7 @@ import MarkdownPreview from './MarkdownPreview';
 import ProcessingSteps from './ProcessingSteps';
 
 const ResultsView = () => {
-    const { id } = useParams();
+    const { batchId } = useParams();
     const [batch, setBatch] = useState(null);
     const [loading, setLoading] = useState(true);
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -19,7 +19,7 @@ const ResultsView = () => {
     useEffect(() => {
         const fetchBatch = async () => {
             try {
-                const data = await getBatch(id);
+                const data = await getBatch(batchId);
                 setBatch(data);
                 setError('');
 
@@ -36,7 +36,7 @@ const ResultsView = () => {
         };
 
         fetchBatch();
-    }, [id]);
+    }, [batchId]);
 
     const handleUpdate = async () => {
         if (!batch || !batch.images[selectedImageIndex]) return;
@@ -46,7 +46,7 @@ const ResultsView = () => {
             const currentImage = batch.images[selectedImageIndex];
             // In a real app, you'd update the specific image's data
             // Here we assume the backend handles the update for the batch
-            await updateBatch(id, { data: currentImage.ocr_data });
+            await updateBatch(batchId, { data: currentImage.ocr_data });
             alert("Saved successfully!");
         } catch (error) {
             console.error("Update failed:", error);
@@ -66,7 +66,7 @@ const ResultsView = () => {
 
     const handleExport = async (format) => {
         try {
-            await exportBatch(id, format);
+            await exportBatch(batchId, format);
             alert(`Exported to ${format.toUpperCase()}`);
         } catch (error) {
             console.error("Export failed:", error);
