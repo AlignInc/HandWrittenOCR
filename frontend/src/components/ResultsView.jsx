@@ -12,6 +12,7 @@ const ResultsView = () => {
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
     const [activeTab, setActiveTab] = useState('fields'); // fields, markdown, csv
     const [saving, setSaving] = useState(false);
+    const [error, setError] = useState('');
 
     const apiBaseUrl = useMemo(() => import.meta.env.VITE_API_URL || 'http://localhost:8000', []);
 
@@ -20,6 +21,7 @@ const ResultsView = () => {
             try {
                 const data = await getBatch(id);
                 setBatch(data);
+                setError('');
 
                 // Poll if processing
                 if (data.status === 'processing' || data.status === 'pending') {
@@ -27,6 +29,7 @@ const ResultsView = () => {
                 }
             } catch (error) {
                 console.error("Failed to fetch batch:", error);
+                setError('獲取結果失敗，請檢查後端服務是否可用並重試。');
             } finally {
                 setLoading(false);
             }
@@ -74,7 +77,14 @@ const ResultsView = () => {
     if (loading || !batch) {
         return (
             <div className="min-h-screen bg-cyber-black flex items-center justify-center">
-                <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-cyber-primary"></div>
+                {error ? (
+                    <div className="text-center space-y-3">
+                        <p className="text-cyber-primary font-bold">{error}</p>
+                        <Link to="/" className="text-cyber-muted underline">返回上傳</Link>
+                    </div>
+                ) : (
+                    <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-cyber-primary"></div>
+                )}
             </div>
         );
     }
