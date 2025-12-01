@@ -18,26 +18,39 @@ logger = logging.getLogger(__name__)
 class OCRProcessor:
     
     def __init__(self):
+        self.pp_structure = None
         # Initialize PP-StructureV2 for Layout Analysis and Table Recognition
         # table=True enables table recognition
         # ocr=True enables text recognition within blocks
         # Disable image_orientation to avoid requiring extra PULC model download
-        self.pp_structure = PPStructure(
-            show_log=True,
-            image_orientation=False,
-            table=True,
-            ocr=True,
-            layout=True,
-            recovery=True,
-            lang='ch',
-            use_gpu=False
-        )
+        self._init_pp_structure()
         
         # Initialize OpenAI client if enabled
         self.use_gpt_vision = os.getenv("USE_GPT_VISION", "false").lower() == "true"
         if self.use_gpt_vision:
             from openai import OpenAI
             self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        else:
+            self.client = None
+
+    def _init_pp_structure(self):
+        """Load PP-Structure models and fail fast with a readable message."""
+        try:
+            self.pp_structure = PPStructure(
+                show_log=True,
+                image_orientation=False,
+                table=True,
+                ocr=True,
+                layout=True,
+                recovery=True,
+                lang='ch',
+                use_gpu=False
+            )
+            logger.info("PP-Structure initialized (lang=ch, gpu=%s)", False)
+        except Exception as exc:
+            logger.exception("Failed to initialize PP-Structure OCR models.")
+            # Raise a descriptive error so the batch processor can surface it
+            raise RuntimeError("PP-Structure initialization failed. Check PaddleOCR installation and model files.") from exc
 
     def preprocess_image(self, image_path):
         """
@@ -65,7 +78,15 @@ class OCRProcessor:
         Use PP-StructureV2 to extract text and structure
         """
         try:
+            if not self.pp_structure:
+                raise RuntimeError("PP-Structure is not initialized.")
+
+            if not Path(image_path).exists():
+                raise FileNotFoundError(f"Image not found: {image_path}")
+
             img = cv2.imread(image_path)
+            if img is None:
+                raise ValueError(f"Failed to read image from path: {image_path}")
             
             # Run layout analysis
             result = self.pp_structure(img)
@@ -77,7 +98,7 @@ class OCRProcessor:
             full_text = []
             structured_data = []
             
-            for region in result:
+            for region in result or []:
                 region_type = region.get('type', '')
                 res = region.get('res', [])
                 
@@ -121,6 +142,9 @@ class OCRProcessor:
                                 })
             
             raw_text = "\n".join(full_text)
+
+            if not raw_text.strip():
+                raise ValueError("OCR engine returned empty text.")
             
             # Calculate average confidence
             confidences = [item['confidence'] for item in structured_data if 'confidence' in item]
@@ -129,8 +153,9 @@ class OCRProcessor:
             return raw_text, avg_confidence, structured_data
             
         except Exception as e:
-            logger.error(f"PaddleOCR processing failed: {str(e)}")
-            return "", 0.0, []
+            logger.exception("PaddleOCR processing failed for %s", image_path)
+            # Bubble up so caller can mark the batch as failed
+            raise
 
     def extract_structured_data(self, raw_text: str, form_type="GCCF_10K", ocr_results=None):
         """
@@ -231,9 +256,8 @@ class OCRProcessor:
             except Exception as e:
                 logger.error(f"Error parsing GPT-4 Vision response: {e}")
                 return None, None
-            
         except Exception as e:
-            logger.error(f"GPT-4 Vision API call failed: {e}")
+            logger.exception("GPT-4 Vision API call failed for %s", image_path)
             return None, None
 
     # Assuming there's a process_document method that uses the above
@@ -272,9 +296,32 @@ class OCRProcessor:
                 logger.error(f"GPT-4 Vision failed, falling back to template matching: {e}")
         
         # Fallback: Use template-based extraction from PaddleOCR results
-        result["data"], result["confidence"] = self._template_based_extraction(
+        layout_data, layout_conf = self._template_based_extraction(
             raw_text, paddle_results, form_type
         )
+        rule_data, rule_conf = self.extract_structured_data(raw_text, form_type, paddle_results)
+
+        # Merge heuristic extraction so we return whatever signal we have
+        merged_data = {}
+        merged_conf = {}
+        template = get_template(form_type)
+        for field in template["fields"]:
+            key = field["key"]
+            layout_val = layout_data.get(key)
+            rule_val = rule_data.get(key)
+
+            if layout_val not in (None, ""):
+                merged_data[key] = layout_val
+                merged_conf[key] = layout_conf.get(key, 0.0)
+            elif rule_val not in (None, ""):
+                merged_data[key] = rule_val
+                merged_conf[key] = rule_conf.get(key, 0.0)
+            else:
+                merged_data[key] = None
+                merged_conf[key] = 0.0
+
+        result["data"] = merged_data
+        result["confidence"] = merged_conf
 
         # If nothing meaningful extracted, at least return full raw text
         if not any(v for v in result["data"].values() if v not in (None, "")):

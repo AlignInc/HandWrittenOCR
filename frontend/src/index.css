@@ -3,9 +3,9 @@
 @tailwind utilities;
 
 :root {
-  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --gradient-success: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-  --gradient-accent: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --gradient-primary: linear-gradient(135deg, #a5b4fc 0%, #c7d2fe 100%);
+  --gradient-success: linear-gradient(135deg, #34d399 0%, #6ee7b7 100%);
+  --gradient-accent: linear-gradient(135deg, #fcd34d 0%, #f97316 100%);
 }
 
 body {
@@ -15,17 +15,19 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  @apply bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100;
+  @apply bg-gray-50 text-gray-900;
 }
 
 /* Glassmorphism effect */
 .glass {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  @apply bg-cyber-black text-cyber-text font-sans antialiased overflow-x-hidden;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(215, 222, 234, 0.8);
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.08);
+  @apply text-cyber-text font-sans antialiased overflow-x-hidden;
   background-image:
-    radial-gradient(circle at 50% 0%, #1a1f35 0%, transparent 70%),
-    radial-gradient(circle at 100% 0%, #121624 0%, transparent 50%);
+    radial-gradient(circle at 50% -10%, rgba(165, 180, 252, 0.35) 0%, transparent 60%),
+    radial-gradient(circle at 100% 0%, rgba(248, 212, 77, 0.28) 0%, transparent 45%);
 }
 
 /* Custom Scrollbar */
@@ -35,20 +37,20 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-cyber-dark;
+  @apply bg-white;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-cyber-border rounded-full hover:bg-cyber-primary/50 transition-colors;
+  @apply bg-cyber-border rounded-full hover:bg-cyber-primary/70 transition-colors;
 }
 
 /* Glassmorphism */
 .glass-panel {
-  @apply bg-cyber-card/60 backdrop-blur-xl border border-cyber-border/50 shadow-2xl;
+  @apply bg-white/80 backdrop-blur-xl border border-cyber-border/80 shadow-xl;
 }
 
 .glass-card {
-  @apply bg-cyber-card/40 backdrop-blur-md border border-cyber-border/30 hover:border-cyber-primary/50 transition-all duration-300;
+  @apply bg-white/70 backdrop-blur-md border border-cyber-border/70 hover:border-cyber-primary/40 transition-all duration-300 shadow-md;
 }
 
 /* Neon Glow Effects */
@@ -94,15 +96,19 @@ body {
 /* Grid Background */
 .cyber-grid-bg {
   background-size: 40px 40px;
-  background-image: linear-gradient(to right, rgba(30, 36, 56, 0.3) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(30, 36, 56, 0.3) 1px, transparent 1px);
-  mask-image: radial-gradient(circle at center, black 40%, transparent 80%);
+  background-image: linear-gradient(to right, rgba(148, 163, 184, 0.18) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(148, 163, 184, 0.18) 1px, transparent 1px);
+  mask-image: radial-gradient(circle at center, black 42%, transparent 82%);
+}
+
+.confidence-high {
+  @apply bg-emerald-100 text-emerald-800;
 }
 
 .confidence-medium {
-  @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200;
+  @apply bg-amber-100 text-amber-800;
 }
 
 .confidence-low {
-  @apply bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200;
+  @apply bg-rose-100 text-rose-800;
 }

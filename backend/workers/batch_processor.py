@@ -1,6 +1,5 @@
 import json
 import logging
-from pathlib import Path
 from sqlalchemy.orm import Session
 from models import Batch, Image, OcrResult, BatchStatus
 from database import SessionLocal
@@ -30,6 +29,9 @@ def process_batch(batch_id: str):
         
         # Get OCR processor
         processor = get_processor()
+
+        success_count = 0
+        failures = []
         
         # Process each image
         for image in batch.images:
@@ -41,6 +43,9 @@ def process_batch(batch_id: str):
                     image.file_path,
                     batch.form_type
                 )
+
+                if not result or not result.get("raw_text"):
+                    raise ValueError("OCR returned empty result")
                 
                 # Save OCR result
                 ocr_result = OcrResult(
@@ -53,20 +58,29 @@ def process_batch(batch_id: str):
                 db.commit()
                 
                 logger.info(f"Successfully processed image {image.id}")
+                success_count += 1
                 
             except Exception as e:
-                logger.error(f"Error processing image {image.id}: {e}")
+                logger.exception(f"Error processing image {image.id}: {e}")
+                failures.append(f"Image {image.page_index}: {e}")
                 # Continue with next image even if one fails
                 continue
         
-        # Update batch status to done
-        batch.status = BatchStatus.DONE
+        if success_count == 0:
+            batch.status = BatchStatus.ERROR
+            batch.error_message = "; ".join(failures) if failures else "OCR produced no results"
+            logger.error("Batch %s failed: %s", batch_id, batch.error_message)
+        else:
+            batch.status = BatchStatus.DONE
+            if failures:
+                batch.error_message = "; ".join(failures)
+                logger.warning("Batch %s completed with partial failures: %s", batch_id, batch.error_message)
+            logger.info(f"Batch {batch_id} processing complete ({success_count} succeeded, {len(failures)} failed)")
+
         db.commit()
         
-        logger.info(f"Batch {batch_id} processing complete")
-        
     except Exception as e:
-        logger.error(f"Error processing batch {batch_id}: {e}")
+        logger.exception(f"Error processing batch {batch_id}: {e}")
         
         # Update batch status to error
         batch = db.query(Batch).filter(Batch.id == batch_id).first()

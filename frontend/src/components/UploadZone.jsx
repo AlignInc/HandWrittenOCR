@@ -61,9 +61,9 @@ export default function UploadZone() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+        <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-100">
             {/* Background Grid */}
-            <div className="absolute inset-0 cyber-grid-bg opacity-20 pointer-events-none" />
+            <div className="absolute inset-0 cyber-grid-bg opacity-40 pointer-events-none" />
 
             <div className="w-full max-w-4xl z-10">
                 <div className="text-center mb-12 space-y-4">
@@ -81,7 +81,7 @@ export default function UploadZone() {
 
                     {/* Form Type Selector */}
                     <div className="flex justify-center mb-8">
-                        <div className="inline-flex bg-cyber-dark/50 p-1 rounded-xl border border-cyber-border/50 backdrop-blur-sm">
+                        <div className="inline-flex bg-white p-1 rounded-xl border border-cyber-border/70 shadow-sm backdrop-blur-sm">
                             {['GCCF_10K', 'MGT_BOOK'].map((type) => (
                                 <button
                                     key={type}
@@ -89,8 +89,8 @@ export default function UploadZone() {
                                     className={`
                                         px-6 py-2 rounded-lg text-sm font-bold tracking-wider transition-all duration-300
                                         ${formType === type
-                                            ? 'bg-cyber-primary text-cyber-black shadow-[0_0_15px_rgba(0,240,255,0.4)]'
-                                            : 'text-cyber-muted hover:text-white hover:bg-white/5'}
+                                            ? 'bg-cyber-primary text-white shadow-[0_10px_30px_rgba(37,99,235,0.25)]'
+                                            : 'text-cyber-muted hover:text-cyber-text hover:bg-cyber-dark/60'}
                                     `}
                                 >
                                     {type}
@@ -134,30 +134,30 @@ export default function UploadZone() {
                     </div>
 
                     {/* Previews */}
-                    {files.length > 0 && (
-                        <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
-                            {files.map((file, index) => (
-                                <div key={index} className="relative group">
-                                    <img
-                                        src={file.preview}
-                                        alt={file.name}
-                                        className="w-full h-24 object-cover rounded-lg border border-cyber-border group-hover:border-cyber-primary/50 transition-all"
-                                    />
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            removeFile(index);
-                                        }}
-                                        className="absolute -top-2 -right-2 bg-cyber-accent text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all shadow-lg hover:scale-110"
-                                    >
-                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                    </button>
+                            {files.length > 0 && (
+                                <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    {files.map((file, index) => (
+                                        <div key={index} className="relative group">
+                                            <img
+                                                src={file.preview}
+                                                alt={file.name}
+                                                className="w-full h-24 object-cover rounded-lg border border-cyber-border group-hover:border-cyber-primary/50 transition-all"
+                                            />
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    removeFile(index);
+                                                }}
+                                                className="absolute -top-2 -right-2 bg-cyber-accent text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all shadow-lg hover:scale-110"
+                                            >
+                                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    ))}
                                 </div>
-                            ))}
-                        </div>
-                    )}
+                            )}
 
                     {/* Upload Button */}
                     <div className="mt-8 text-center">
@@ -168,7 +168,7 @@ export default function UploadZone() {
                                 px-8 py-3 rounded-lg font-bold tracking-wider uppercase transition-all duration-300
                                 ${uploading || files.length === 0
                                     ? 'bg-cyber-dark text-cyber-muted cursor-not-allowed border border-cyber-border'
-                                    : 'bg-cyber-primary text-cyber-black hover:shadow-[0_0_20px_rgba(0,240,255,0.6)] hover:scale-105'}
+                                    : 'bg-cyber-primary text-white hover:shadow-[0_10px_30px_rgba(37,99,235,0.35)] hover:scale-105'}
                             `}
                         >
                             {uploading ? (

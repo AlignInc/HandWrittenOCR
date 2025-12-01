@@ -76,7 +76,7 @@ const ResultsView = () => {
 
     if (loading || !batch) {
         return (
-            <div className="min-h-screen bg-cyber-black flex items-center justify-center">
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 flex items-center justify-center">
                 {error ? (
                     <div className="text-center space-y-3">
                         <p className="text-cyber-primary font-bold">{error}</p>
@@ -121,7 +121,7 @@ const ResultsView = () => {
     };
 
     return (
-        <div className="min-h-screen bg-cyber-black text-cyber-text p-6">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 text-cyber-text p-6">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="flex justify-between items-center mb-8">
@@ -144,7 +144,7 @@ const ResultsView = () => {
                         <button
                             onClick={handleUpdate}
                             disabled={saving}
-                            className="px-4 py-2 bg-cyber-primary text-cyber-black rounded-lg font-bold hover:shadow-[0_0_15px_rgba(0,240,255,0.4)] transition-all"
+                            className="px-4 py-2 bg-cyber-primary text-white rounded-lg font-bold hover:shadow-[0_10px_30px_rgba(37,99,235,0.35)] transition-all"
                         >
                             {saving ? 'Saving...' : 'Save Changes'}
                         </button>
@@ -172,7 +172,7 @@ const ResultsView = () => {
                                         alt={`Page ${selectedImageIndex + 1}`}
                                         className="w-full h-auto object-contain"
                                     />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-cyber-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
+                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
                                         <p className="text-sm font-mono text-cyber-primary">
                                             {overallConfidence(currentImage.confidence) ? `Confidence: ${overallConfidence(currentImage.confidence)}%` : 'Confidence: N/A'}
                                         </p>
@@ -208,7 +208,7 @@ const ResultsView = () => {
                     <div className="lg:col-span-2">
                         <div className="glass-panel rounded-xl overflow-hidden min-h-[600px] flex flex-col">
                             {/* Tabs */}
-                            <div className="flex border-b border-cyber-border bg-cyber-dark/50">
+                            <div className="flex border-b border-cyber-border bg-white">
                                 {[
                                     { id: 'fields', label: 'Structured Data', icon: '📝' },
                                     { id: 'markdown', label: 'Markdown', icon: '📄' },
@@ -232,7 +232,7 @@ const ResultsView = () => {
                             </div>
 
                             {/* Content */}
-                            <div className="p-6 flex-1 bg-cyber-card/30">
+                            <div className="p-6 flex-1 bg-white/70">
                                 {activeTab === 'fields' && currentImage && (
                                     <FieldEditor
                                         data={currentImage.ocr_data || {}}
@@ -246,7 +246,7 @@ const ResultsView = () => {
                                 )}
 
                                 {activeTab === 'csv' && currentImage && (
-                                    <div className="bg-cyber-black p-4 rounded-lg border border-cyber-border font-mono text-xs text-cyber-muted overflow-auto max-h-[500px]">
+                                    <div className="bg-white p-4 rounded-lg border border-cyber-border font-mono text-xs text-cyber-muted overflow-auto max-h-[500px]">
                                         <pre>{JSON.stringify(currentImage.ocr_data, null, 2)}</pre>
                                     </div>
                                 )}

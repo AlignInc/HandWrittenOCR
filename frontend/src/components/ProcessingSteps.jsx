@@ -49,7 +49,7 @@ const ProcessingSteps = ({ status }) => {
                   ${isActive
                                         ? 'bg-cyber-primary/20 border-cyber-primary text-cyber-primary scale-110 shadow-[0_0_20px_rgba(0,240,255,0.4)] animate-pulse'
                                         : isCompleted
-                                            ? 'bg-cyber-primary border-cyber-primary text-cyber-black'
+                                            ? 'bg-cyber-primary border-cyber-primary text-white'
                                             : 'bg-cyber-card border-cyber-border text-cyber-muted'
                                     }
                 `}

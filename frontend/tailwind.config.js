@@ -10,15 +10,16 @@ export default {
             colors: {
                 // AI-Native Palette
                 cyber: {
-                    black: '#050505',
-                    dark: '#0B0F19',
-                    card: '#121624',
-                    border: '#1E2438',
-                    text: '#E2E8F0',
-                    muted: '#94A3B8',
-                    primary: '#00F0FF', // Cyan Neon
-                    secondary: '#7000FF', // Purple Neon
-                    accent: '#FF003C', // Red Neon
+                    // Light-first palette for the UI refresh
+                    black: '#F8FAFC',       // canvas background
+                    dark: '#EDF2F7',        // subtle panels / toggles
+                    card: '#FFFFFF',        // main surface
+                    border: '#D7DEEA',      // light borders
+                    text: '#0F172A',        // primary text
+                    muted: '#5B6474',       // secondary text
+                    primary: '#2563EB',     // blue accent
+                    secondary: '#A855F7',   // purple accent
+                    accent: '#F97316',      // warm accent
                 }
             },
             fontFamily: {
